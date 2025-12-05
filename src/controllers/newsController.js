@@ -1,4 +1,6 @@
 const newsService = require('../services/newsService');
+const cloudinary = require('../config/cloudinary');
+const fs = require('fs');
 
 // Public: liste des articles publiés
 const getPublicNewsList = async (req, res) => {
@@ -78,6 +80,24 @@ const adminGetNewsList = async (req, res) => {
 const adminCreateNews = async (req, res) => {
   try {
     const data = req.body;
+
+    // Si une image de couverture est uploadée, la pousser vers Cloudinary
+    if (req.file) {
+      if (
+        process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
+      ) {
+        const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'nou/news',
+          public_id: `news_${Date.now()}`
+        });
+        data.image_couverture_url = uploadResult.secure_url;
+        fs.unlink(req.file.path, () => {});
+      } else {
+        data.image_couverture_url = `/uploads/news/covers/${req.file.filename}`;
+      }
+    }
 
     if (!data.titre || !data.contenu) {
       return res.status(400).json({

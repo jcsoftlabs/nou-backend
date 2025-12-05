@@ -1,4 +1,6 @@
 const membreService = require('../services/membreService');
+const cloudinary = require('../config/cloudinary');
+const fs = require('fs');
 const { createOrUpdateMembreSchema } = require('../validators/membreValidators');
 
 /**
@@ -105,9 +107,27 @@ const uploadProfilePhoto = async (req, res) => {
       });
     }
     
-    // Construire l'URL de la photo
-    const photoUrl = `/uploads/profiles/${req.file.filename}`;
-    
+    let photoUrl;
+
+    // Si Cloudinary est configuré, uploader l'image et utiliser l'URL Cloudinary
+    if (
+      process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET
+    ) {
+      const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'nou/profiles',
+        public_id: `profile_${userId}_${Date.now()}`
+      });
+      photoUrl = uploadResult.secure_url;
+
+      // On peut supprimer le fichier local (non persistant sur Railway de toute façon)
+      fs.unlink(req.file.path, () => {});
+    } else {
+      // Fallback local (utile en dev), mais non persistant sur Railway
+      photoUrl = `/uploads/profiles/${req.file.filename}`;
+    }
+
     // Mettre à jour le profil avec la nouvelle photo
     const result = await membreService.updateOwnProfile(
       userId, 

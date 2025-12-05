@@ -5,6 +5,7 @@ const adminController = require('../controllers/adminController');
 const authenticate = require('../middleware/auth');
 const checkRole = require('../middleware/checkRole');
 const uploadPodcast = require('../config/multerPodcast');
+const uploadNewsCover = require('../config/multerNews');
 
 // Middleware : tous les endpoints /admin nécessitent auth + rôle admin
 router.use(authenticate);
@@ -229,10 +230,33 @@ router.get('/news', adminController.adminGetNewsList);
 
 /**
  * @route   POST /admin/news
- * @desc    Créer un article de news
+ * @desc    Créer un article de news (avec image de couverture optionnelle)
  * @access  Private (Admin only)
  */
-router.post('/news', adminController.adminCreateNews);
+router.post(
+  '/news',
+  (req, res, next) => {
+    uploadNewsCover.single('cover')(req, res, (err) => {
+      if (err) {
+        console.error('Erreur upload cover news (admin):', err);
+
+        let message = "Erreur lors de l'upload de l'image de couverture";
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          message = 'Image trop volumineuse (max 5MB)';
+        } else if (err.message) {
+          message = err.message;
+        }
+
+        return res.status(400).json({
+          success: false,
+          message
+        });
+      }
+      next();
+    });
+  },
+  adminController.adminCreateNews
+);
 
 /**
  * @route   PUT /admin/news/:id
