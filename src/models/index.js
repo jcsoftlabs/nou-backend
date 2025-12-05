@@ -12,6 +12,8 @@ const FCMToken = require('./FCMToken');
 const Formation = require('./Formation');
 const ModuleFormation = require('./FormationModule');
 const Don = require('./Don');
+const News = require('./News');
+const Annonce = require('./Annonce');
 
 // Définir les associations
 
@@ -57,6 +59,14 @@ AuditLog.belongsTo(Membre, { foreignKey: 'user_id', as: 'user' });
 Membre.hasMany(FCMToken, { foreignKey: 'membre_id', as: 'fcm_tokens' });
 FCMToken.belongsTo(Membre, { foreignKey: 'membre_id', as: 'membre' });
 
+// News / Articles
+Membre.hasMany(News, { foreignKey: 'auteur_id', as: 'articles_news' });
+News.belongsTo(Membre, { foreignKey: 'auteur_id', as: 'auteur' });
+
+// Annonces
+Membre.hasMany(Annonce, { foreignKey: 'auteur_id', as: 'annonces' });
+Annonce.belongsTo(Membre, { foreignKey: 'auteur_id', as: 'auteur' });
+
 // Formations - Modules - Quiz
 Formation.hasMany(ModuleFormation, { foreignKey: 'formation_id', as: 'modules' });
 ModuleFormation.belongsTo(Formation, { foreignKey: 'formation_id', as: 'formation' });
@@ -78,5 +88,7 @@ module.exports = {
   FCMToken,
   Formation,
   ModuleFormation,
-  Don
+  Don,
+  News,
+  Annonce
 };

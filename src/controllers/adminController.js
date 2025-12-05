@@ -53,6 +53,8 @@ const adminService = require('../services/adminService');
 const cotisationService = require('../services/cotisationService');
 const podcastService = require('../services/podcastService');
 const formationService = require('../services/formationService');
+const newsController = require('./newsController');
+const annonceController = require('./annonceController');
 const { Don, Membre } = require('../models');
 // const fcmService = require('../services/fcmService'); // Désactivé temporairement
 
@@ -715,6 +717,19 @@ const attachQuizToModule = async (req, res) => {
 };
 
 module.exports = {
+  // News (admin) déléguées au newsController
+  adminGetNewsList: newsController.adminGetNewsList,
+  adminCreateNews: newsController.adminCreateNews,
+  adminUpdateNews: newsController.adminUpdateNews,
+  adminDeleteNews: newsController.adminDeleteNews,
+  adminPublishNews: newsController.adminPublishNews,
+  adminUnpublishNews: newsController.adminUnpublishNews,
+
+  // Annonces (admin) déléguées à annonceController
+  adminGetAnnonces: annonceController.adminGetAnnonces,
+  adminCreateAnnonce: annonceController.adminCreateAnnonce,
+  adminUpdateAnnonce: annonceController.adminUpdateAnnonce,
+  adminChangeAnnonceStatus: annonceController.adminChangeAnnonceStatus,
   getStats,
   getMonthlyStats,
   getDepartmentStats,

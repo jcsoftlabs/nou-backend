@@ -220,4 +220,74 @@ router.put('/dons/:id/approuver', adminController.approuverDon);
  */
 router.put('/dons/:id/rejeter', adminController.rejeterDon);
 
+/**
+ * @route   GET /admin/news
+ * @desc    Obtenir la liste des articles de news (tous statuts)
+ * @access  Private (Admin only)
+ */
+router.get('/news', adminController.adminGetNewsList);
+
+/**
+ * @route   POST /admin/news
+ * @desc    Créer un article de news
+ * @access  Private (Admin only)
+ */
+router.post('/news', adminController.adminCreateNews);
+
+/**
+ * @route   PUT /admin/news/:id
+ * @desc    Mettre à jour un article de news
+ * @access  Private (Admin only)
+ */
+router.put('/news/:id', adminController.adminUpdateNews);
+
+/**
+ * @route   DELETE /admin/news/:id
+ * @desc    Supprimer (soft delete) un article de news
+ * @access  Private (Admin only)
+ */
+router.delete('/news/:id', adminController.adminDeleteNews);
+
+/**
+ * @route   PUT /admin/news/:id/publish
+ * @desc    Publier un article de news
+ * @access  Private (Admin only)
+ */
+router.put('/news/:id/publish', adminController.adminPublishNews);
+
+/**
+ * @route   PUT /admin/news/:id/unpublish
+ * @desc    Dépublier un article de news
+ * @access  Private (Admin only)
+ */
+router.put('/news/:id/unpublish', adminController.adminUnpublishNews);
+
+/**
+ * @route   GET /admin/annonces
+ * @desc    Obtenir la liste des annonces
+ * @access  Private (Admin only)
+ */
+router.get('/annonces', adminController.adminGetAnnonces);
+
+/**
+ * @route   POST /admin/annonces
+ * @desc    Créer une annonce
+ * @access  Private (Admin only)
+ */
+router.post('/annonces', adminController.adminCreateAnnonce);
+
+/**
+ * @route   PUT /admin/annonces/:id
+ * @desc    Mettre à jour une annonce
+ * @access  Private (Admin only)
+ */
+router.put('/annonces/:id', adminController.adminUpdateAnnonce);
+
+/**
+ * @route   PUT /admin/annonces/:id/status
+ * @desc    Changer le statut d'une annonce
+ * @access  Private (Admin only)
+ */
+router.put('/annonces/:id/status', adminController.adminChangeAnnonceStatus);
+
 module.exports = router;
