@@ -23,19 +23,42 @@ const logAudit = async (userId, action, entityType, entityId, description, dataB
 };
 
 /**
- * Calculer le total des cotisations validées d'un membre pour l'année en cours
+ * Calculer le total des cotisations validées d'un membre pour sa période d'adhésion annuelle
+ * La période commence à la date de création du membre et dure 12 mois
  */
 const getTotalCotisationsAnnee = async (membreId) => {
   const { Op } = require('sequelize');
-  const debutAnnee = new Date(new Date().getFullYear(), 0, 1); // 1er janvier
-  const finAnnee = new Date(new Date().getFullYear(), 11, 31, 23, 59, 59); // 31 décembre
+  
+  // Récupérer la date de création du membre
+  const membre = await Membre.findByPk(membreId);
+  if (!membre) {
+    throw new Error('Membre non trouvé');
+  }
+  
+  const dateAdhesion = new Date(membre.date_creation);
+  const maintenant = new Date();
+  
+  // Calculer le début de la période d'adhésion actuelle (anniversaire le plus récent)
+  let debutPeriode = new Date(dateAdhesion);
+  debutPeriode.setFullYear(maintenant.getFullYear());
+  
+  // Si l'anniversaire de cette année n'est pas encore passé, prendre l'année précédente
+  if (debutPeriode > maintenant) {
+    debutPeriode.setFullYear(maintenant.getFullYear() - 1);
+  }
+  
+  // Fin de période = 12 mois après le début
+  const finPeriode = new Date(debutPeriode);
+  finPeriode.setFullYear(debutPeriode.getFullYear() + 1);
+  finPeriode.setDate(finPeriode.getDate() - 1); // Dernier jour de la période
+  finPeriode.setHours(23, 59, 59, 999);
   
   const cotisations = await Cotisation.findAll({
     where: {
       membre_id: membreId,
       statut_paiement: 'valide',
       date_paiement: {
-        [Op.between]: [debutAnnee, finAnnee]
+        [Op.between]: [debutPeriode, finPeriode]
       }
     }
   });
@@ -45,19 +68,42 @@ const getTotalCotisationsAnnee = async (membreId) => {
 };
 
 /**
- * Vérifier si c'est le premier versement de l'année
+ * Vérifier si c'est le premier versement de la période d'adhésion annuelle
+ * La période commence à la date de création du membre et dure 12 mois
  */
 const isPremierVersementAnnee = async (membreId) => {
   const { Op } = require('sequelize');
-  const debutAnnee = new Date(new Date().getFullYear(), 0, 1);
-  const finAnnee = new Date(new Date().getFullYear(), 11, 31, 23, 59, 59);
+  
+  // Récupérer la date de création du membre
+  const membre = await Membre.findByPk(membreId);
+  if (!membre) {
+    throw new Error('Membre non trouvé');
+  }
+  
+  const dateAdhesion = new Date(membre.date_creation);
+  const maintenant = new Date();
+  
+  // Calculer le début de la période d'adhésion actuelle (anniversaire le plus récent)
+  let debutPeriode = new Date(dateAdhesion);
+  debutPeriode.setFullYear(maintenant.getFullYear());
+  
+  // Si l'anniversaire de cette année n'est pas encore passé, prendre l'année précédente
+  if (debutPeriode > maintenant) {
+    debutPeriode.setFullYear(maintenant.getFullYear() - 1);
+  }
+  
+  // Fin de période = 12 mois après le début
+  const finPeriode = new Date(debutPeriode);
+  finPeriode.setFullYear(debutPeriode.getFullYear() + 1);
+  finPeriode.setDate(finPeriode.getDate() - 1);
+  finPeriode.setHours(23, 59, 59, 999);
   
   const count = await Cotisation.count({
     where: {
       membre_id: membreId,
       statut_paiement: 'valide',
       date_paiement: {
-        [Op.between]: [debutAnnee, finAnnee]
+        [Op.between]: [debutPeriode, finPeriode]
       }
     }
   });
