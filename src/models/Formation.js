@@ -27,6 +27,11 @@ const Formation = sequelize.define('Formation', {
   date_publication: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
+  },
+  total_points: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    comment: 'Total des points pour cette formation'
   }
 }, {
   tableName: 'formations',
