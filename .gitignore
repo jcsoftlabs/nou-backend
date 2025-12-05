@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables
+.env
+
+# Firebase credentials
+src/config/firebase-service-account.json
+
+# Uploads
+src/uploads/*
+!src/uploads/.gitkeep
+!src/uploads/index.js
+src/uploads/receipts/*
+!src/uploads/receipts/.gitkeep
+uploads/profils/*
+!uploads/profils/.gitkeep
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build
+dist/
+build/

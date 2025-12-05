@@ -1,0 +1,14 @@
+node_modules/
+.git/
+.env
+.env.local
+*.log
+coverage/
+.DS_Store
+test_*.js
+CHANGELOG*.md
+RESUME*.md
+TEST_RESULTS.md
+MAPPING_VERIFICATION.md
+*.md
+!README.md
