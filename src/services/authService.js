@@ -195,7 +195,9 @@ const login = async (identifier, password) => {
         prenom: membre.prenom,
         email: membre.email,
         telephone_principal: membre.telephone_principal,
-        role: membre.role_utilisateur
+        role: membre.role_utilisateur,
+        // Inclure aussi la photo dans la réponse de login pour l'app mobile
+        photo_profil_url: membre.photo_profil_url,
       },
       token: tokens.accessToken,
       refresh_token: tokens.refreshToken
