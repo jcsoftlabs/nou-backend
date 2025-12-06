@@ -125,14 +125,23 @@ const register = async (data) => {
       }
     }
     
+    // Générer les tokens exactement comme pour la connexion
+    const tokens = generateTokens(membre.id, membre.email, membre.role_utilisateur);
+
+    // Retourner la même structure que login() pour permettre l'auto-login côté app mobile
     return {
-      id: membre.id,
-      username: membre.username,
-      code_adhesion: membre.code_adhesion,
-      nom: membre.nom,
-      prenom: membre.prenom,
-      email: membre.email,
-      telephone_principal: membre.telephone_principal
+      membre: {
+        id: membre.id,
+        username: membre.username,
+        code_adhesion: membre.code_adhesion,
+        nom: membre.nom,
+        prenom: membre.prenom,
+        email: membre.email,
+        telephone_principal: membre.telephone_principal,
+        role: membre.role_utilisateur
+      },
+      token: tokens.accessToken,
+      refresh_token: tokens.refreshToken
     };
     
   } catch (error) {
