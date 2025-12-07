@@ -2,6 +2,19 @@ const { Podcast, AuditLog } = require('../models');
 // const fcmService = require('./fcmService'); // Désactivé temporairement
 const path = require('path');
 const fs = require('fs');
+
+/**
+ * Convertir les URLs relatives en URLs complètes
+ */
+const getFullUrl = (relativePath) => {
+  if (!relativePath) return null;
+  if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+    return relativePath;
+  }
+  // Utiliser l'URL de base depuis les variables d'environnement ou Railway
+  const baseUrl = process.env.BASE_URL || process.env.RAILWAY_STATIC_URL || 'http://localhost:4000';
+  return `${baseUrl}${relativePath}`;
+};
 /**
  * Logger une action dans audit
  */
@@ -80,8 +93,17 @@ const getPodcasts = async (options = {}) => {
       offset: parseInt(offset)
     });
     
+    // Convertir les URLs relatives en URLs complètes
+    const podcastsWithFullUrls = rows.map(podcast => {
+      const podcastData = podcast.toJSON();
+      podcastData.url_audio = getFullUrl(podcastData.url_audio);
+      podcastData.img_couverture_url = getFullUrl(podcastData.img_couverture_url);
+      podcastData.url_live = getFullUrl(podcastData.url_live);
+      return podcastData;
+    });
+    
     return {
-      podcasts: rows,
+      podcasts: podcastsWithFullUrls,
       pagination: {
         total: count,
         page: parseInt(page),
@@ -105,7 +127,13 @@ const getPodcastById = async (id) => {
       throw new Error('Podcast non trouvé');
     }
     
-    return podcast;
+    // Convertir les URLs relatives en URLs complètes
+    const podcastData = podcast.toJSON();
+    podcastData.url_audio = getFullUrl(podcastData.url_audio);
+    podcastData.img_couverture_url = getFullUrl(podcastData.img_couverture_url);
+    podcastData.url_live = getFullUrl(podcastData.url_live);
+    
+    return podcastData;
   } catch (error) {
     throw error;
   }
