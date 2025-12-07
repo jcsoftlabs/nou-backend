@@ -482,7 +482,7 @@ const updateFormation = async (req, res) => {
 const createModule = async (req, res) => {
   try {
     const { id } = req.params; // id de la formation
-    const moduleFormation = await formationService.adminCreateModule(id, req.body);
+    const moduleFormation = await formationService.adminCreateModule(id, req.body, req.files);
 
     return res.status(201).json({
       success: true,
@@ -504,7 +504,7 @@ const createModule = async (req, res) => {
 const updateModule = async (req, res) => {
   try {
     const { id } = req.params;
-    const moduleFormation = await formationService.adminUpdateModule(id, req.body);
+    const moduleFormation = await formationService.adminUpdateModule(id, req.body, req.files);
 
     return res.status(200).json({
       success: true,

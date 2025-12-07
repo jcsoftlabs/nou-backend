@@ -43,6 +43,38 @@ const ModuleFormation = sequelize.define('ModuleFormation', {
     type: DataTypes.STRING(255),
     allowNull: true
   },
+  // Fichier PDF (document de cours, support)
+  fichier_pdf_url: {
+    type: DataTypes.STRING(500),
+    allowNull: true
+  },
+  // Fichier PowerPoint ou présentation
+  fichier_ppt_url: {
+    type: DataTypes.STRING(500),
+    allowNull: true
+  },
+  // Fichiers supplémentaires (JSON array)
+  // Ex: [{"type": "pdf", "url": "https://...", "nom": "doc.pdf"}]
+  fichiers_supplementaires: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    get() {
+      const raw = this.getDataValue('fichiers_supplementaires');
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    },
+    set(value) {
+      if (value === null || value === undefined) {
+        this.setDataValue('fichiers_supplementaires', null);
+      } else {
+        this.setDataValue('fichiers_supplementaires', JSON.stringify(value));
+      }
+    }
+  },
   ordre: {
     type: DataTypes.INTEGER,
     defaultValue: 0

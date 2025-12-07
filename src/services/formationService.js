@@ -1,5 +1,8 @@
 const { Op } = require('sequelize');
 const { Formation, ModuleFormation, Quiz, QuizResultat, QuizQuestion } = require('../models');
+const cloudinary = require('../config/cloudinary');
+const fs = require('fs');
+const path = require('path');
 
 /**
  * Récupérer les formations actives avec leurs modules et quiz (côté membre)
@@ -379,7 +382,7 @@ const adminUpdateFormation = async (id, data) => {
 /**
  * Créer un module pour une formation (admin)
  */
-const adminCreateModule = async (formationId, data) => {
+const adminCreateModule = async (formationId, data, files) => {
   const formation = await Formation.findByPk(formationId);
 
   if (!formation) {
@@ -390,7 +393,7 @@ const adminCreateModule = async (formationId, data) => {
     throw new Error('Le titre du module est obligatoire');
   }
 
-  const moduleFormation = await ModuleFormation.create({
+  const moduleData = {
     formation_id: formationId,
     titre: data.titre,
     description: data.description || null,
@@ -399,7 +402,93 @@ const adminCreateModule = async (formationId, data) => {
     image_url: data.image_url || null,
     video_url: data.video_url || null,
     ordre: typeof data.ordre === 'number' ? data.ordre : 0
-  });
+  };
+
+  // Upload des fichiers sur Cloudinary si disponibles
+  if (files) {
+    const cloudinaryConfigured = 
+      process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET;
+
+    if (cloudinaryConfigured) {
+      // Upload PDF
+      if (files.pdf && files.pdf[0]) {
+        const pdfUpload = await cloudinary.uploader.upload(files.pdf[0].path, {
+          folder: 'nou/formations/modules',
+          resource_type: 'raw',
+          public_id: `pdf_${Date.now()}`
+        });
+        moduleData.fichier_pdf_url = pdfUpload.secure_url;
+        fs.unlink(files.pdf[0].path, () => {});
+      }
+
+      // Upload PowerPoint
+      if (files.ppt && files.ppt[0]) {
+        const pptUpload = await cloudinary.uploader.upload(files.ppt[0].path, {
+          folder: 'nou/formations/modules',
+          resource_type: 'raw',
+          public_id: `ppt_${Date.now()}`
+        });
+        moduleData.fichier_ppt_url = pptUpload.secure_url;
+        fs.unlink(files.ppt[0].path, () => {});
+      }
+
+      // Upload vidéo
+      if (files.video && files.video[0]) {
+        const videoUpload = await cloudinary.uploader.upload(files.video[0].path, {
+          folder: 'nou/formations/modules',
+          resource_type: 'video',
+          public_id: `video_${Date.now()}`
+        });
+        moduleData.video_url = videoUpload.secure_url;
+        fs.unlink(files.video[0].path, () => {});
+      }
+
+      // Upload image
+      if (files.image && files.image[0]) {
+        const imageUpload = await cloudinary.uploader.upload(files.image[0].path, {
+          folder: 'nou/formations/modules',
+          public_id: `image_${Date.now()}`
+        });
+        moduleData.image_url = imageUpload.secure_url;
+        fs.unlink(files.image[0].path, () => {});
+      }
+
+      // Upload fichiers supplémentaires
+      if (files.fichiers && files.fichiers.length > 0) {
+        const fichiersSupplementaires = [];
+        for (const file of files.fichiers) {
+          const ext = path.extname(file.originalname).toLowerCase();
+          let resourceType = 'raw';
+          
+          if (['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext)) {
+            resourceType = 'image';
+          } else if (['.mp4', '.mov', '.avi'].includes(ext)) {
+            resourceType = 'video';
+          }
+
+          const upload = await cloudinary.uploader.upload(file.path, {
+            folder: 'nou/formations/modules',
+            resource_type: resourceType,
+            public_id: `extra_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+          });
+
+          fichiersSupplementaires.push({
+            type: ext.substring(1),
+            url: upload.secure_url,
+            nom: file.originalname
+          });
+
+          fs.unlink(file.path, () => {});
+        }
+        
+        moduleData.fichiers_supplementaires = fichiersSupplementaires;
+      }
+    }
+  }
+
+  const moduleFormation = await ModuleFormation.create(moduleData);
 
   return moduleFormation;
 };
@@ -407,14 +496,14 @@ const adminCreateModule = async (formationId, data) => {
 /**
  * Mettre à jour un module de formation (admin)
  */
-const adminUpdateModule = async (moduleId, data) => {
+const adminUpdateModule = async (moduleId, data, files) => {
   const moduleFormation = await ModuleFormation.findByPk(moduleId);
 
   if (!moduleFormation) {
     throw new Error('Module de formation non trouvé');
   }
 
-  await moduleFormation.update({
+  const updateData = {
     titre: typeof data.titre !== 'undefined' ? data.titre : moduleFormation.titre,
     description: typeof data.description !== 'undefined' ? data.description : moduleFormation.description,
     type_contenu: typeof data.type_contenu !== 'undefined' ? data.type_contenu : moduleFormation.type_contenu,
@@ -422,7 +511,96 @@ const adminUpdateModule = async (moduleId, data) => {
     image_url: typeof data.image_url !== 'undefined' ? data.image_url : moduleFormation.image_url,
     video_url: typeof data.video_url !== 'undefined' ? data.video_url : moduleFormation.video_url,
     ordre: typeof data.ordre !== 'undefined' ? data.ordre : moduleFormation.ordre
-  });
+  };
+
+  // Upload des fichiers sur Cloudinary si disponibles
+  if (files) {
+    const cloudinaryConfigured = 
+      process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET;
+
+    if (cloudinaryConfigured) {
+      // Upload PDF
+      if (files.pdf && files.pdf[0]) {
+        const pdfUpload = await cloudinary.uploader.upload(files.pdf[0].path, {
+          folder: 'nou/formations/modules',
+          resource_type: 'raw',
+          public_id: `pdf_${Date.now()}`
+        });
+        updateData.fichier_pdf_url = pdfUpload.secure_url;
+        fs.unlink(files.pdf[0].path, () => {});
+      }
+
+      // Upload PowerPoint
+      if (files.ppt && files.ppt[0]) {
+        const pptUpload = await cloudinary.uploader.upload(files.ppt[0].path, {
+          folder: 'nou/formations/modules',
+          resource_type: 'raw',
+          public_id: `ppt_${Date.now()}`
+        });
+        updateData.fichier_ppt_url = pptUpload.secure_url;
+        fs.unlink(files.ppt[0].path, () => {});
+      }
+
+      // Upload vidéo
+      if (files.video && files.video[0]) {
+        const videoUpload = await cloudinary.uploader.upload(files.video[0].path, {
+          folder: 'nou/formations/modules',
+          resource_type: 'video',
+          public_id: `video_${Date.now()}`
+        });
+        updateData.video_url = videoUpload.secure_url;
+        fs.unlink(files.video[0].path, () => {});
+      }
+
+      // Upload image
+      if (files.image && files.image[0]) {
+        const imageUpload = await cloudinary.uploader.upload(files.image[0].path, {
+          folder: 'nou/formations/modules',
+          public_id: `image_${Date.now()}`
+        });
+        updateData.image_url = imageUpload.secure_url;
+        fs.unlink(files.image[0].path, () => {});
+      }
+
+      // Upload fichiers supplémentaires
+      if (files.fichiers && files.fichiers.length > 0) {
+        const existingFichiers = moduleFormation.fichiers_supplementaires || [];
+        const newFichiers = [];
+        
+        for (const file of files.fichiers) {
+          const ext = path.extname(file.originalname).toLowerCase();
+          let resourceType = 'raw';
+          
+          if (['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext)) {
+            resourceType = 'image';
+          } else if (['.mp4', '.mov', '.avi'].includes(ext)) {
+            resourceType = 'video';
+          }
+
+          const upload = await cloudinary.uploader.upload(file.path, {
+            folder: 'nou/formations/modules',
+            resource_type: resourceType,
+            public_id: `extra_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+          });
+
+          newFichiers.push({
+            type: ext.substring(1),
+            url: upload.secure_url,
+            nom: file.originalname
+          });
+
+          fs.unlink(file.path, () => {});
+        }
+        
+        // Fusionner avec les fichiers existants
+        updateData.fichiers_supplementaires = [...existingFichiers, ...newFichiers];
+      }
+    }
+  }
+
+  await moduleFormation.update(updateData);
 
   return moduleFormation;
 };

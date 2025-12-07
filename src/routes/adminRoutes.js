@@ -6,6 +6,7 @@ const authenticate = require('../middleware/auth');
 const checkRole = require('../middleware/checkRole');
 const uploadPodcast = require('../config/multerPodcast');
 const uploadNewsCover = require('../config/multerNews');
+const uploadFormation = require('../config/multerFormation');
 
 // Middleware : tous les endpoints /admin nécessitent auth + rôle admin
 router.use(authenticate);
@@ -182,17 +183,75 @@ router.delete('/formations/:id', adminController.deleteFormation);
 /**
  * @route   POST /admin/formations/:id/modules
  * @desc    Créer un module pour une formation
- * @body    titre, description, ordre, type_contenu, contenu_texte, image_url, video_url
+ * @body    titre, description, ordre, type_contenu, contenu_texte
+ * @files   pdf, ppt, video, image, fichiers[] (fichiers supplémentaires)
  * @access  Private (Admin only)
  */
-router.post('/formations/:id/modules', adminController.createModule);
+router.post('/formations/:id/modules',
+  (req, res, next) => {
+    uploadFormation.fields([
+      { name: 'pdf', maxCount: 1 },
+      { name: 'ppt', maxCount: 1 },
+      { name: 'video', maxCount: 1 },
+      { name: 'image', maxCount: 1 },
+      { name: 'fichiers', maxCount: 10 }
+    ])(req, res, (err) => {
+      if (err) {
+        console.error('Erreur upload formation module:', err);
+        
+        let message = 'Erreur lors de l\'upload des fichiers';
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          message = 'Un ou plusieurs fichiers sont trop volumineux. Taille maximale: 100 MB';
+        } else if (err.message) {
+          message = err.message;
+        }
+        
+        return res.status(400).json({
+          success: false,
+          message: message
+        });
+      }
+      next();
+    });
+  },
+  adminController.createModule
+);
 
 /**
  * @route   PUT /admin/modules/:id
  * @desc    Mettre à jour un module de formation (contenu, ordre, etc.)
+ * @files   pdf, ppt, video, image, fichiers[] (fichiers supplémentaires)
  * @access  Private (Admin only)
  */
-router.put('/modules/:id', adminController.updateModule);
+router.put('/modules/:id',
+  (req, res, next) => {
+    uploadFormation.fields([
+      { name: 'pdf', maxCount: 1 },
+      { name: 'ppt', maxCount: 1 },
+      { name: 'video', maxCount: 1 },
+      { name: 'image', maxCount: 1 },
+      { name: 'fichiers', maxCount: 10 }
+    ])(req, res, (err) => {
+      if (err) {
+        console.error('Erreur upload formation module update:', err);
+        
+        let message = 'Erreur lors de l\'upload des fichiers';
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          message = 'Un ou plusieurs fichiers sont trop volumineux. Taille maximale: 100 MB';
+        } else if (err.message) {
+          message = err.message;
+        }
+        
+        return res.status(400).json({
+          success: false,
+          message: message
+        });
+      }
+      next();
+    });
+  },
+  adminController.updateModule
+);
 
 /**
  * @route   POST /admin/modules/attach-quiz
