@@ -143,6 +143,13 @@ router.delete('/podcasts/:id', adminController.deletePodcast);
 router.get('/quiz', adminController.getQuiz);
 
 /**
+ * @route   DELETE /admin/quiz/:id
+ * @desc    Supprimer un quiz
+ * @access  Private (Admin only)
+ */
+router.delete('/quiz/:id', adminController.deleteQuiz);
+
+/**
  * @route   GET /admin/formations
  * @desc    Obtenir la liste des formations
  * @query   page, limit, est_active
@@ -164,6 +171,13 @@ router.post('/formations', adminController.createFormation);
  * @access  Private (Admin only)
  */
 router.put('/formations/:id', adminController.updateFormation);
+
+/**
+ * @route   DELETE /admin/formations/:id
+ * @desc    Supprimer une formation
+ * @access  Private (Admin only)
+ */
+router.delete('/formations/:id', adminController.deleteFormation);
 
 /**
  * @route   POST /admin/formations/:id/modules

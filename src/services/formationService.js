@@ -446,6 +446,49 @@ const adminAttachQuizToModule = async (quizId, moduleId) => {
   return quiz;
 };
 
+/**
+ * Supprimer une formation (admin)
+ */
+const adminDeleteFormation = async (id) => {
+  const formation = await Formation.findByPk(id, {
+    include: [
+      {
+        model: ModuleFormation,
+        as: 'modules',
+        include: [
+          {
+            model: Quiz,
+            as: 'quizzes',
+            required: false
+          }
+        ]
+      }
+    ]
+  });
+
+  if (!formation) {
+    throw new Error('Formation non trouvée');
+  }
+
+  // Détacher les quiz des modules (mettre module_id à null)
+  if (formation.modules && formation.modules.length > 0) {
+    for (const module of formation.modules) {
+      if (module.quizzes && module.quizzes.length > 0) {
+        for (const quiz of module.quizzes) {
+          await quiz.update({ module_id: null });
+        }
+      }
+      // Supprimer le module
+      await module.destroy();
+    }
+  }
+
+  // Supprimer la formation
+  await formation.destroy();
+
+  return { success: true, message: 'Formation supprimée avec succès' };
+};
+
 module.exports = {
   getFormationsForUser,
   getFormationByIdForUser,
@@ -454,5 +497,6 @@ module.exports = {
   adminUpdateFormation,
   adminCreateModule,
   adminUpdateModule,
-  adminAttachQuizToModule
+  adminAttachQuizToModule,
+  adminDeleteFormation
 };

@@ -732,6 +732,39 @@ const attachQuizToModule = async (req, res) => {
   }
 };
 
+/**
+ * DELETE /admin/formations/:id - Supprimer une formation
+ */
+const deleteFormation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await formationService.adminDeleteFormation(id);
+    return res.status(200).json({ success: true, message: result.message });
+  } catch (error) {
+    console.error("Erreur lors de la suppression de la formation:", error);
+    return res.status(400).json({ success: false, message: error.message || 'Erreur lors de la suppression de la formation' });
+  }
+};
+
+/**
+ * DELETE /admin/quiz/:id - Supprimer un quiz
+ */
+const deleteQuiz = async (req, res) => {
+  try {
+    const { Quiz } = require('../models');
+    const { id } = req.params;
+    const quiz = await Quiz.findByPk(id);
+    if (!quiz) {
+      return res.status(404).json({ success: false, message: 'Quiz non trouvé' });
+    }
+    await quiz.destroy();
+    return res.status(200).json({ success: true, message: 'Quiz supprimé avec succès' });
+  } catch (error) {
+    console.error('Erreur lors de la suppression du quiz:', error);
+    return res.status(400).json({ success: false, message: error.message || 'Erreur lors de la suppression du quiz' });
+  }
+};
+
 module.exports = {
   // News (admin) déléguées au newsController
   adminGetNewsList: newsController.adminGetNewsList,
@@ -770,5 +803,7 @@ module.exports = {
   attachQuizToModule,
   getDons,
   approuverDon,
-  rejeterDon
+  rejeterDon,
+  deleteFormation,
+  deleteQuiz
 };
