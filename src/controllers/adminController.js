@@ -318,6 +318,22 @@ const uploadPodcast = async (req, res) => {
 };
 
 /**
+ * DELETE /admin/podcasts/:id - Supprimer un podcast
+ */
+const deletePodcast = async (req, res) => {
+  try {
+    const podcastController = require('./podcastController');
+    return await podcastController.deletePodcast(req, res);
+  } catch (error) {
+    console.error('Erreur lors de la suppression du podcast:', error);
+    return res.status(400).json({
+      success: false,
+      message: error.message || 'Erreur lors de la suppression du podcast'
+    });
+  }
+};
+
+/**
  * GET /admin/quiz - Liste des quiz
  */
 const getQuiz = async (req, res) => {
@@ -740,6 +756,7 @@ module.exports = {
   validerCotisation,
   getPodcasts,
   uploadPodcast,
+  deletePodcast,
   getQuiz,
   sendNotification,
   getAuditLogs,

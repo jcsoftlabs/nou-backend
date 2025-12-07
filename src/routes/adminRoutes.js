@@ -128,6 +128,13 @@ router.post('/podcasts/upload',
 );
 
 /**
+ * @route   DELETE /admin/podcasts/:id
+ * @desc    Supprimer un podcast
+ * @access  Private (Admin only)
+ */
+router.delete('/podcasts/:id', adminController.deletePodcast);
+
+/**
  * @route   GET /admin/quiz
  * @desc    Obtenir la liste des quiz
  * @query   page, limit, actif
