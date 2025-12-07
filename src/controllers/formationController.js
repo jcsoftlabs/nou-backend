@@ -36,7 +36,7 @@ const getFormationById = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'Formation récupérée avec succès',
-      data: formation
+      data: { formation }
     });
   } catch (error) {
     console.error('Erreur lors de la récupération de la formation:', error);
