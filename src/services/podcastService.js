@@ -2,19 +2,8 @@ const { Podcast, AuditLog } = require('../models');
 // const fcmService = require('./fcmService'); // Désactivé temporairement
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('../config/cloudinary');
 
-/**
- * Convertir les URLs relatives en URLs complètes
- */
-const getFullUrl = (relativePath) => {
-  if (!relativePath) return null;
-  if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
-    return relativePath;
-  }
-  // Utiliser l'URL de base depuis les variables d'environnement ou Railway
-  const baseUrl = process.env.BASE_URL || process.env.RAILWAY_STATIC_URL || 'http://localhost:4000';
-  return `${baseUrl}${relativePath}`;
-};
 /**
  * Logger une action dans audit
  */
@@ -44,12 +33,47 @@ const createPodcast = async (data, files, adminUser, req) => {
     // Construire les URLs des fichiers uploadés
     const podcastData = { ...data };
     
+    // Upload audio sur Cloudinary si configuré
     if (files?.audio) {
-      podcastData.url_audio = `/uploads/podcasts/audio/${files.audio[0].filename}`;
+      if (
+        process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
+      ) {
+        const audioUpload = await cloudinary.uploader.upload(files.audio[0].path, {
+          folder: 'nou/podcasts/audio',
+          resource_type: 'video', // 'video' est utilisé pour les fichiers audio aussi
+          public_id: `podcast_audio_${Date.now()}`
+        });
+        podcastData.url_audio = audioUpload.secure_url;
+        
+        // Supprimer le fichier local temporaire
+        fs.unlink(files.audio[0].path, () => {});
+      } else {
+        // Fallback local (dev)
+        podcastData.url_audio = `/uploads/podcasts/audio/${files.audio[0].filename}`;
+      }
     }
     
+    // Upload cover sur Cloudinary si configuré
     if (files?.cover) {
-      podcastData.img_couverture_url = `/uploads/podcasts/covers/${files.cover[0].filename}`;
+      if (
+        process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
+      ) {
+        const coverUpload = await cloudinary.uploader.upload(files.cover[0].path, {
+          folder: 'nou/podcasts/covers',
+          public_id: `podcast_cover_${Date.now()}`
+        });
+        podcastData.img_couverture_url = coverUpload.secure_url;
+        
+        // Supprimer le fichier local temporaire
+        fs.unlink(files.cover[0].path, () => {});
+      } else {
+        // Fallback local (dev)
+        podcastData.img_couverture_url = `/uploads/podcasts/covers/${files.cover[0].filename}`;
+      }
     }
     
     // Créer le podcast
@@ -93,17 +117,8 @@ const getPodcasts = async (options = {}) => {
       offset: parseInt(offset)
     });
     
-    // Convertir les URLs relatives en URLs complètes
-    const podcastsWithFullUrls = rows.map(podcast => {
-      const podcastData = podcast.toJSON();
-      podcastData.url_audio = getFullUrl(podcastData.url_audio);
-      podcastData.img_couverture_url = getFullUrl(podcastData.img_couverture_url);
-      podcastData.url_live = getFullUrl(podcastData.url_live);
-      return podcastData;
-    });
-    
     return {
-      podcasts: podcastsWithFullUrls,
+      podcasts: rows,
       pagination: {
         total: count,
         page: parseInt(page),
@@ -127,13 +142,7 @@ const getPodcastById = async (id) => {
       throw new Error('Podcast non trouvé');
     }
     
-    // Convertir les URLs relatives en URLs complètes
-    const podcastData = podcast.toJSON();
-    podcastData.url_audio = getFullUrl(podcastData.url_audio);
-    podcastData.img_couverture_url = getFullUrl(podcastData.img_couverture_url);
-    podcastData.url_live = getFullUrl(podcastData.url_live);
-    
-    return podcastData;
+    return podcast;
   } catch (error) {
     throw error;
   }
@@ -155,12 +164,45 @@ const updatePodcast = async (id, data, files, adminUser, req) => {
     // Mettre à jour avec les nouvelles données
     const updateData = { ...data };
     
+    // Upload audio sur Cloudinary si un nouveau fichier est fourni
     if (files?.audio) {
-      updateData.url_audio = `/uploads/podcasts/audio/${files.audio[0].filename}`;
+      if (
+        process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
+      ) {
+        const audioUpload = await cloudinary.uploader.upload(files.audio[0].path, {
+          folder: 'nou/podcasts/audio',
+          resource_type: 'video',
+          public_id: `podcast_audio_${Date.now()}`
+        });
+        updateData.url_audio = audioUpload.secure_url;
+        
+        // Supprimer le fichier local temporaire
+        fs.unlink(files.audio[0].path, () => {});
+      } else {
+        updateData.url_audio = `/uploads/podcasts/audio/${files.audio[0].filename}`;
+      }
     }
     
+    // Upload cover sur Cloudinary si une nouvelle cover est fournie
     if (files?.cover) {
-      updateData.img_couverture_url = `/uploads/podcasts/covers/${files.cover[0].filename}`;
+      if (
+        process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
+      ) {
+        const coverUpload = await cloudinary.uploader.upload(files.cover[0].path, {
+          folder: 'nou/podcasts/covers',
+          public_id: `podcast_cover_${Date.now()}`
+        });
+        updateData.img_couverture_url = coverUpload.secure_url;
+        
+        // Supprimer le fichier local temporaire
+        fs.unlink(files.cover[0].path, () => {});
+      } else {
+        updateData.img_couverture_url = `/uploads/podcasts/covers/${files.cover[0].filename}`;
+      }
     }
     
     await podcast.update(updateData);
