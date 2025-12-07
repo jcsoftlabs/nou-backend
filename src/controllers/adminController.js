@@ -765,6 +765,54 @@ const deleteQuiz = async (req, res) => {
   }
 };
 
+/**
+ * PUT /admin/membres/:id/rating - Mettre à jour la note (0..5)
+ * Règle: seule une augmentation est autorisée côté API.
+ */
+const updateMembreRating = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating, note } = req.body;
+    if (typeof rating === 'undefined') {
+      return res.status(400).json({ success: false, message: 'rating est requis (0..5)' });
+    }
+    const { Membre, AuditLog } = require('../models');
+    const membre = await Membre.findByPk(id);
+    if (!membre) {
+      return res.status(404).json({ success: false, message: 'Membre introuvable' });
+    }
+    const newRating = Math.min(5, Math.max(0, parseInt(rating, 10)));
+    if (newRating < (membre.rating || 0)) {
+      return res.status(400).json({ success: false, message: 'La note ne peut pas être diminuée par l\'API' });
+    }
+    const before = membre.toJSON();
+    await membre.update({ rating: newRating, dernier_update: new Date() });
+
+    // Audit log (best effort)
+    try {
+      if (AuditLog) {
+        await AuditLog.create({
+          user_id: req.user?.id,
+          action_type: 'UPDATE_RATING',
+          target_type: 'membre',
+          target_id: membre.id,
+          data_before: { rating: before.rating },
+          data_after: { rating: newRating, note: note || null },
+          ip_address: req.ip,
+          user_agent: req.headers['user-agent']
+        });
+      }
+    } catch (e) {
+      console.error('Audit log rating error:', e);
+    }
+
+    return res.status(200).json({ success: true, message: 'Note mise à jour', data: { id: membre.id, rating: membre.rating } });
+  } catch (error) {
+    console.error('Erreur update rating:', error);
+    return res.status(400).json({ success: false, message: error.message || 'Erreur lors de la mise à jour de la note' });
+  }
+};
+
 module.exports = {
   // News (admin) déléguées au newsController
   adminGetNewsList: newsController.adminGetNewsList,
@@ -805,5 +853,6 @@ module.exports = {
   approuverDon,
   rejeterDon,
   deleteFormation,
-  deleteQuiz
+  deleteQuiz,
+  updateMembreRating
 };

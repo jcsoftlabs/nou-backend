@@ -178,6 +178,14 @@ const Membre = sequelize.define('Membre', {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
     field: 'dernier_update'
+  },
+  rating: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    validate: {
+      min: 0,
+      max: 5
+    }
   }
 }, {
   tableName: 'membres',

@@ -71,6 +71,13 @@ router.put('/membres/:id', adminController.updateMembre);
 router.put('/membres/:id/status', adminController.updateMembreStatus);
 
 /**
+ * @route   PUT /admin/membres/:id/rating
+ * @desc    Mettre à jour la note (0..5) d'un membre (admin uniquement). Seulement l'augmentation est autorisée.
+ * @access  Private (Admin only)
+ */
+router.put('/membres/:id/rating', adminController.updateMembreRating);
+
+/**
  * @route   GET /admin/cotisations
  * @desc    Obtenir la liste des cotisations avec filtres
  * @query   page, limit, statut, date_debut, date_fin, membre_id
