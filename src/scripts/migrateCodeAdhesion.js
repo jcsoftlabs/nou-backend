@@ -5,8 +5,8 @@ const { sequelize, Membre } = require('../models');
 
 /**
  * Génère un code d'adhésion en mémoire suivant la nouvelle structure :
- * A + 1ère lettre du prénom + 2ème lettre du nom de famille + 4 derniers chiffres du téléphone
- * Exemple : A + J (Jean) + U (Dupont) + 1234 => AJU1234
+ * A + 1ère lettre du prénom + 1ère lettre du nom de famille + 4 derniers chiffres du téléphone
+ * Exemple : A + J (Jean) + D (Dupont) + 1234 => AJD1234
  */
 const generateCodeAdhesionLocal = (usedCodes, membre) => {
   const prenom = (membre.prenom || '').trim();
@@ -20,10 +20,10 @@ const generateCodeAdhesionLocal = (usedCodes, membre) => {
   }
 
   const firstLetterPrenom = prenom[0].toUpperCase();
-  const secondLetterNom = nom.length > 1 ? nom[1].toUpperCase() : 'X';
+  const firstLetterNom = nom[0].toUpperCase();
   const last4Phone = digits.slice(-4);
 
-  const baseCode = `A${firstLetterPrenom}${secondLetterNom}${last4Phone}`;
+  const baseCode = `A${firstLetterPrenom}${firstLetterNom}${last4Phone}`;
 
   let code = baseCode;
   let suffix = 0;

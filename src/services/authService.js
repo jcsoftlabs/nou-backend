@@ -6,8 +6,8 @@ const referralService = require('./referralService');
 
 /**
  * Génère un code d'adhésion (code de parrainage) suivant la nouvelle structure :
- * A + 1ère lettre du prénom + 2ème lettre du nom de famille + 4 derniers chiffres du téléphone
- * Exemple : A + J (Jean) + u (Dupont) + 1234 (téléphone) => AJu1234
+ * A + 1ère lettre du prénom + 1ère lettre du nom de famille + 4 derniers chiffres du téléphone
+ * Exemple : A + J (Jean) + D (Dupont) + 1234 (téléphone) => AJD1234
  */
 const generateReferralCodeFromData = async (data) => {
   const prenom = (data.prenom || '').trim();
@@ -22,10 +22,10 @@ const generateReferralCodeFromData = async (data) => {
   }
 
   const firstLetterPrenom = prenom[0].toUpperCase();
-  const secondLetterNom = nom.length > 1 ? nom[1].toUpperCase() : 'X';
+  const firstLetterNom = nom[0].toUpperCase();
   const last4Phone = digits.slice(-4);
 
-  const baseCode = `A${firstLetterPrenom}${secondLetterNom}${last4Phone}`;
+  const baseCode = `A${firstLetterPrenom}${firstLetterNom}${last4Phone}`;
 
   // On s'assure que le code_adhesion est unique en base.
   // En cas de collision rare, on ajoute un suffixe numérique.
