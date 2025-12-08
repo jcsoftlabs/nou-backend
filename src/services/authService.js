@@ -247,9 +247,68 @@ const verifyOTPCode = async (telephone, otp) => {
   }
 };
 
+/**
+ * Vérifier le NIN pour la récupération de mot de passe
+ */
+const verifyNIN = async (nin) => {
+  try {
+    // Chercher le membre par son NIN
+    const membre = await Membre.findOne({ where: { nin } });
+    
+    if (!membre) {
+      throw new Error('NIN invalide');
+    }
+    
+    // Ne retourner que les informations minimales pour confirmer l'identité
+    return {
+      success: true,
+      message: 'NIN vérifié avec succès',
+      membre: {
+        nom: membre.nom,
+        prenom: membre.prenom,
+        telephone_principal: membre.telephone_principal
+      }
+    };
+    
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Réinitialiser le mot de passe via NIN
+ */
+const resetPassword = async (nin, newPassword) => {
+  try {
+    // Chercher le membre par son NIN
+    const membre = await Membre.findOne({ where: { nin } });
+    
+    if (!membre) {
+      throw new Error('NIN invalide');
+    }
+    
+    // Hasher le nouveau mot de passe
+    const salt = await bcrypt.genSalt(10);
+    const password_hash = await bcrypt.hash(newPassword, salt);
+    
+    // Mettre à jour le mot de passe
+    await membre.update({ password_hash });
+    
+    return {
+      success: true,
+      message: 'Mot de passe réinitialisé avec succès'
+    };
+    
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   register,
   login,
   sendOTP,
-  verifyOTPCode
+  verifyOTPCode,
+  verifyNIN,
+  resetPassword
 };

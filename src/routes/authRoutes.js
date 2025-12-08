@@ -50,4 +50,18 @@ router.post('/send-otp', authController.sendOtp);
  */
 router.post('/verify-otp', authController.verifyOtp);
 
+/**
+ * @route   POST /auth/verify-nin
+ * @desc    Vérifier le NIN pour récupération de mot de passe
+ * @access  Public
+ */
+router.post('/verify-nin', authController.verifyNin);
+
+/**
+ * @route   POST /auth/reset-password
+ * @desc    Réinitialiser le mot de passe via NIN
+ * @access  Public
+ */
+router.post('/reset-password', authController.resetPassword);
+
 module.exports = router;

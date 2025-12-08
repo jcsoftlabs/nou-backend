@@ -3,7 +3,9 @@ const {
   registerSchema,
   loginSchema,
   sendOtpSchema,
-  verifyOtpSchema
+  verifyOtpSchema,
+  verifyNinSchema,
+  resetPasswordSchema
 } = require('../validators/authValidators');
 
 /**
@@ -184,9 +186,87 @@ const verifyOtp = async (req, res) => {
   }
 };
 
+/**
+ * POST /auth/verify-nin
+ * Vérifier le NIN pour la récupération de mot de passe
+ */
+const verifyNin = async (req, res) => {
+  try {
+    // Valider les données avec Joi
+    const { error, value } = verifyNinSchema.validate(req.body);
+    
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Erreur de validation',
+        errors: error.details.map(detail => ({
+          field: detail.path.join('.'),
+          message: detail.message
+        }))
+      });
+    }
+    
+    // Appeler le service de vérification NIN
+    const result = await authService.verifyNIN(value.nin);
+    
+    return res.status(200).json({
+      success: true,
+      message: 'NIN vérifié avec succès',
+      data: result
+    });
+    
+  } catch (error) {
+    console.error('Erreur lors de la vérification du NIN:', error);
+    return res.status(400).json({
+      success: false,
+      message: error.message || 'Erreur lors de la vérification du NIN'
+    });
+  }
+};
+
+/**
+ * POST /auth/reset-password
+ * Réinitialiser le mot de passe via NIN
+ */
+const resetPassword = async (req, res) => {
+  try {
+    // Valider les données avec Joi
+    const { error, value } = resetPasswordSchema.validate(req.body);
+    
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Erreur de validation',
+        errors: error.details.map(detail => ({
+          field: detail.path.join('.'),
+          message: detail.message
+        }))
+      });
+    }
+    
+    // Appeler le service de réinitialisation de mot de passe
+    const result = await authService.resetPassword(value.nin, value.new_password);
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Mot de passe réinitialisé avec succès',
+      data: result
+    });
+    
+  } catch (error) {
+    console.error('Erreur lors de la réinitialisation du mot de passe:', error);
+    return res.status(400).json({
+      success: false,
+      message: error.message || 'Erreur lors de la réinitialisation du mot de passe'
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
   sendOtp,
-  verifyOtp
+  verifyOtp,
+  verifyNin,
+  resetPassword
 };

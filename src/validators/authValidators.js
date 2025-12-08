@@ -177,9 +177,37 @@ const verifyOtpSchema = Joi.object({
   })
 });
 
+/**
+ * Schéma de validation pour la vérification du NIN (récupération de mot de passe)
+ */
+const verifyNinSchema = Joi.object({
+  nin: Joi.string().required().messages({
+    'string.empty': 'Le NIN est requis',
+    'any.required': 'Le NIN est requis'
+  })
+});
+
+/**
+ * Schéma de validation pour la réinitialisation du mot de passe
+ */
+const resetPasswordSchema = Joi.object({
+  nin: Joi.string().required().messages({
+    'string.empty': 'Le NIN est requis',
+    'any.required': 'Le NIN est requis'
+  }),
+  
+  new_password: Joi.string().min(6).required().messages({
+    'string.empty': 'Le nouveau mot de passe est requis',
+    'string.min': 'Le nouveau mot de passe doit contenir au moins 6 caractères',
+    'any.required': 'Le nouveau mot de passe est requis'
+  })
+});
+
 module.exports = {
   registerSchema,
   loginSchema,
   sendOtpSchema,
-  verifyOtpSchema
+  verifyOtpSchema,
+  verifyNinSchema,
+  resetPasswordSchema
 };
