@@ -57,7 +57,9 @@ const Membre = sequelize.define('Membre', {
     defaultValue: 0
   },
   nin: {
-    type: DataTypes.STRING(50)
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    unique: true
   },
   nif: {
     type: DataTypes.STRING(50)
@@ -194,7 +196,8 @@ const Membre = sequelize.define('Membre', {
     { fields: ['username'] },
     { fields: ['code_adhesion'] },
     { fields: ['telephone_principal'] },
-    { fields: ['email'] }
+    { fields: ['email'] },
+    { fields: ['nin'] }
   ]
 });
 

@@ -68,7 +68,10 @@ const registerSchema = Joi.object({
   nb_personnes_a_charge: Joi.number().integer().min(0).default(0),
   
   // Documents officiels
-  nin: Joi.string().max(50).allow('', null),
+  nin: Joi.string().max(50).required().messages({
+    'string.empty': 'Le NIN est requis',
+    'any.required': 'Le NIN est requis'
+  }),
   
   nif: Joi.string().max(50).allow('', null),
   

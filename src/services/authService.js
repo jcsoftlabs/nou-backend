@@ -69,6 +69,14 @@ const register = async (data) => {
       throw new Error('Ce numéro de téléphone est déjà utilisé');
     }
     
+    // Vérifier si le NIN existe déjà
+    const existingNin = await Membre.findOne({ 
+      where: { nin: data.nin } 
+    });
+    if (existingNin) {
+      throw new Error('Ce NIN est déjà utilisé');
+    }
+    
     // Vérifier si le code_adhesion (code de référence du parrain) existe
     if (data.code_adhesion) {
       const parrain = await Membre.findOne({ 
