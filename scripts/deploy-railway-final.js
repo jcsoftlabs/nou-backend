@@ -43,7 +43,8 @@ async function deploy() {
     console.log('✅ Connecté\n');
     
     // Données de test
-    const passwordHash = await bcrypt.hash('password123', 10);
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash('password123', salt);
     const usedCodes = new Set();
     
     const adminCode = generateCodeAdhesion(usedCodes, 'Système', 'Admin', '+50937000001');

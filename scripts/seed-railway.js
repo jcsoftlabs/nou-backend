@@ -93,7 +93,8 @@ async function seedRailway() {
 
     // 2. Création des membres
     console.log('👥 Insertion des membres...');
-    const passwordHash = await bcrypt.hash('password123', 10);
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash('password123', salt);
     
     // Générer les codes d'adhésion selon la nouvelle structure
     const usedCodes = new Set();
