@@ -34,6 +34,7 @@ const formationRoutes = require('./routes/formationRoutes');
 const donRoutes = require('./routes/donRoutes');
 const newsRoutes = require('./routes/newsRoutes');
 const annonceRoutes = require('./routes/annonceRoutes');
+const albumRoutes = require('./routes/albumRoutes');
 // const fcmRoutes = require('./routes/fcmRoutes'); // Désactivé temporairement
 const adminRoutes = require('./routes/adminRoutes');
 
@@ -50,6 +51,7 @@ app.use('/formations', formationRoutes);
 app.use('/dons', donRoutes);
 app.use('/news', newsRoutes);
 app.use('/annonces', annonceRoutes);
+app.use('/albums', albumRoutes);
 // app.use('/fcm', fcmRoutes); // Désactivé temporairement
 app.use('/admin', adminRoutes);
 

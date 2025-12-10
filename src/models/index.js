@@ -14,6 +14,8 @@ const ModuleFormation = require('./FormationModule');
 const Don = require('./Don');
 const News = require('./News');
 const Annonce = require('./Annonce');
+const Album = require('./Album');
+const AlbumPhoto = require('./AlbumPhoto');
 
 // Définir les associations
 
@@ -67,6 +69,14 @@ News.belongsTo(Membre, { foreignKey: 'auteur_id', as: 'auteur' });
 Membre.hasMany(Annonce, { foreignKey: 'auteur_id', as: 'annonces' });
 Annonce.belongsTo(Membre, { foreignKey: 'auteur_id', as: 'auteur' });
 
+// Albums - Membre (auteur)
+Membre.hasMany(Album, { foreignKey: 'auteur_id', as: 'albums' });
+Album.belongsTo(Membre, { foreignKey: 'auteur_id', as: 'auteur' });
+
+// Album - Photos
+Album.hasMany(AlbumPhoto, { foreignKey: 'album_id', as: 'photos' });
+AlbumPhoto.belongsTo(Album, { foreignKey: 'album_id', as: 'album' });
+
 // Formations - Modules - Quiz
 Formation.hasMany(ModuleFormation, { foreignKey: 'formation_id', as: 'modules' });
 ModuleFormation.belongsTo(Formation, { foreignKey: 'formation_id', as: 'formation' });
@@ -90,5 +100,7 @@ module.exports = {
   ModuleFormation,
   Don,
   News,
-  Annonce
+  Annonce,
+  Album,
+  AlbumPhoto
 };
