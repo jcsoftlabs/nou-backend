@@ -106,6 +106,7 @@ const getMembres = async (filters = {}) => {
           as: 'cotisations',
           attributes: ['id', 'montant', 'statut_paiement', 'date_paiement'],
           required: false,
+          separate: true,
           limit: 5,
           order: [['date_paiement', 'DESC']]
         }
