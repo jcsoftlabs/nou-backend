@@ -10,14 +10,24 @@ const Membre = sequelize.define('Membre', {
   username: {
     type: DataTypes.STRING(50),
     unique: true,
-    allowNull: false
+    allowNull: false,
+    set(value) {
+      this.setDataValue('username', value ? value.trim() : value);
+    }
   },
   code_adhesion: {
     type: DataTypes.STRING(50),
-    unique: true
+    unique: true,
+    set(value) {
+      this.setDataValue('code_adhesion', value ? value.trim() : value);
+    }
   },
   code_parrain: {
-    type: DataTypes.STRING(50)
+    type: DataTypes.STRING(50),
+    set(value) {
+      // Trim automatiquement les espaces
+      this.setDataValue('code_parrain', value ? value.trim() : value);
+    }
   },
   nom: {
     type: DataTypes.STRING(100),
