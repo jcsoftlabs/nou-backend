@@ -96,6 +96,7 @@ const getMembres = async (filters = {}) => {
       attributes: { 
         exclude: ['password'] // Ne jamais exposer les mots de passe
       },
+      distinct: true, // Fix pour compter correctement avec les includes
       order: [['date_creation', 'DESC']],
       limit: parseInt(limit),
       offset: parseInt(offset),
