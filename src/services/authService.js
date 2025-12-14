@@ -146,7 +146,8 @@ const register = async (data) => {
         prenom: membre.prenom,
         email: membre.email,
         telephone_principal: membre.telephone_principal,
-        role: membre.role_utilisateur
+        role: membre.role_utilisateur,
+        rating: membre.rating || 0
       },
       token: tokens.accessToken,
       refresh_token: tokens.refreshToken
@@ -206,6 +207,7 @@ const login = async (identifier, password) => {
         role: membre.role_utilisateur,
         // Inclure aussi la photo dans la réponse de login pour l'app mobile
         photo_profil_url: membre.photo_profil_url,
+        rating: membre.rating || 0
       },
       token: tokens.accessToken,
       refresh_token: tokens.refreshToken
